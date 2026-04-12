@@ -9,6 +9,13 @@ dist/
 web-build/
 expo-env.d.ts
 
+node_modules/
+.expo/
+android/
+ios/
+*.log
+.DS_Store
+
 # Native
 .kotlin/
 *.orig.*
