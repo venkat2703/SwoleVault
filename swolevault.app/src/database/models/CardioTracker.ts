@@ -1,12 +1,16 @@
 import { Model } from '@nozbe/watermelondb';
-import { field, date, relation } from '@nozbe/watermelondb/decorators';
-import CardioWorkoutLookup from './CardioWorkoutLookup';
+import { field, date, immutableRelation } from '@nozbe/watermelondb/decorators';
 
 export default class CardioTracker extends Model {
   static table = 'cardio_trackers';
+  static associations = {
+    cardio_workout_lookups: { type: 'belongs_to', key: 'cardio_id' },
+  } as const;
 
   // @ts-ignore
-  @date('date') date: Date;
+  @date('date') date: number;
+  // @ts-ignore
+  @field('cardio_id') cardioId: string;
   // @ts-ignore
   @field('duration_mins') durationMins: number;
   // @ts-ignore
@@ -14,7 +18,6 @@ export default class CardioTracker extends Model {
   // @ts-ignore
   @field('calories_burned') caloriesBurned: number;
 
-  // THE FOREIGN KEY
   // @ts-ignore
-  @relation('cardio_workout_lookups', 'cardio_id') cardioWorkout: CardioWorkoutLookup;
+  @immutableRelation('cardio_workout_lookups', 'cardio_id') cardio;
 }

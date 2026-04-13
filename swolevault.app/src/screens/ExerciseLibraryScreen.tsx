@@ -171,7 +171,12 @@ export default function ExerciseLibraryScreen() {
       </TouchableOpacity>
 
       {/* Add/Edit Modal */}
-      <Modal visible={isModalVisible} animationType="slide" presentationStyle="pageSheet">
+      <Modal 
+          visible={isModalVisible} 
+          animationType="slide" 
+          presentationStyle="pageSheet"
+          onRequestClose={closeModal} // This allows the Android back button to close the modal
+        >
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{editingItem ? 'Edit Exercise' : 'New Exercise'}</Text>
 
