@@ -3,6 +3,8 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      // Decorator plugin MUST come before other plugins
+      ['@babel/plugin-proposal-decorators', { legacy: true }],
       [
         'module-resolver',
         {
