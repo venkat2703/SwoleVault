@@ -26,7 +26,6 @@ export default function LogWorkoutScreen() {
   const fetchExercises = async () => {
     try {
       const table = activeTab === 'Strength' ? 'workout_lookups' : 'cardio_workout_lookups';
-      // We fetch where is_active is true
       const data = await database.get(table).query(Q.where('is_active', true)).fetch();
       
       console.log(`[LogWorkout] Found ${data.length} ${activeTab} exercises`);
@@ -48,8 +47,9 @@ export default function LogWorkoutScreen() {
       await database.write(async () => {
         const creations = validSets.map((s, i) => database.get('workout_trackers').prepareCreate((r: any) => {
           r.date = new Date();
-          r.workout_id = selectedId;
-          r.set_number = i + 1;
+          // FIX: Use camelCase properties to match the Model definitions!
+          r.workout.id = selectedId; // Uses the relation to set the ID
+          r.setNumber = i + 1;       // camelCase
           r.reps = parseInt(s.reps);
           r.weight = parseFloat(s.weight);
         }));
@@ -63,10 +63,11 @@ export default function LogWorkoutScreen() {
       await database.write(async () => {
         await database.get('cardio_trackers').create((r: any) => {
           r.date = new Date();
-          r.cardio_id = selectedId;
-          r.duration_mins = parseInt(cardio.duration) || 0;
+          // FIX: Use camelCase properties to match the Model definitions!
+          r.cardioWorkout.id = selectedId; 
+          r.durationMins = parseInt(cardio.duration) || 0;
           r.steps = parseInt(cardio.steps) || 0;
-          r.calories_burned = parseInt(cardio.calories) || 0;
+          r.caloriesBurned = parseInt(cardio.calories) || 0;
         });
       });
     }
@@ -93,14 +94,13 @@ export default function LogWorkoutScreen() {
             style={{ color: '#FFF' }}
             dropdownIconColor="#FFF"
           >
-            {/* 1. We removed the fixed white color from items to prevent 'invisible' text */}
             <Picker.Item label="Tap to select..." value="" color="#888" />
             {exercises.map(e => (
               <Picker.Item 
                 key={e.id} 
                 label={e.name} 
                 value={e.id} 
-                color={Platform.OS === 'ios' ? '#FFF' : '#000'} // White for iOS dark mode, Black for Android light modal
+                color={Platform.OS === 'ios' ? '#FFF' : '#000'}
               />
             ))}
           </Picker>
