@@ -8,13 +8,17 @@ export type OnboardingStackParamList = {
 };
 
 export type RootStackParamList = {
-  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
+  // Existing Screens
+  Onboarding: undefined;
   MainTabs: undefined;
   ExerciseLibrary: undefined;
-  // Logging Routes
   LogWorkout: undefined;
   LogCardio: undefined;
   LogNutrition: undefined;
   LogWater: undefined;
   LogWeight: undefined;
+  
+  // New Epic 3 Screens
+  GalleryScreen: undefined;
+  CameraScreen: { pose: 'front' | 'back' | 'left' | 'right' };
 };

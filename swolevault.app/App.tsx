@@ -1,3 +1,4 @@
+// App.tsx
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -5,14 +6,20 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '@navigation/types';
 
+// Import Navigators and Screens
 import TabNavigator from '@navigation/TabNavigator';
 import OnboardingStack from '@navigation/OnboardingStack';
-import ExerciseLibraryScreen from '@screens/ExerciseLibraryScreen'; // WE WILL CREATE THIS NEXT
-import { seedDatabase } from '@database/seeder';
+import ExerciseLibraryScreen from '@screens/ExerciseLibraryScreen';
 import LogWorkoutScreen from '@screens/LogWorkoutScreen';
 import LogNutritionScreen from '@screens/LogNutritionScreen';
 import LogWaterScreen from '@screens/LogWaterScreen';
 import LogWeightScreen from '@screens/LogWeightScreen';
+
+// Import New Epic 3 Screens
+import CameraScreen from '@screens/CameraScreen';
+import GalleryScreen from '@screens/GalleryScreen';
+
+import { seedDatabase } from '@database/seeder';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -53,7 +60,6 @@ export default function App() {
       >
         <RootStack.Screen name="Onboarding" component={OnboardingStack} />
         <RootStack.Screen name="MainTabs" component={TabNavigator} />
-        {/* NEW MODAL SCREEN */}
         <RootStack.Screen 
           name="ExerciseLibrary" 
           component={ExerciseLibraryScreen} 
@@ -64,6 +70,10 @@ export default function App() {
         <RootStack.Screen name="LogNutrition" component={LogNutritionScreen} />
         <RootStack.Screen name="LogWater" component={LogWaterScreen} />
         <RootStack.Screen name="LogWeight" component={LogWeightScreen} />
+        
+        {/* NEW EPIC 3 SCREENS REGISTERED HERE */}
+        <RootStack.Screen name="GalleryScreen" component={GalleryScreen} />
+        <RootStack.Screen name="CameraScreen" component={CameraScreen} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

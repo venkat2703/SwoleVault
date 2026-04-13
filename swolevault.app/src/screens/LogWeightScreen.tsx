@@ -5,13 +5,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { database } from '@database/index';
 import { lbsToKg } from '@utils/metrics';
 import UserProfile from '@database/models/UserProfile';
+import { RootStackParamList } from '@navigation/types';
+
+// Strictly typed navigation to prevent TypeScript errors
+type LogWeightNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LogWeight'>;
 
 export default function LogWeightScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<LogWeightNavigationProp>();
   const [weightInput, setWeightInput] = useState('');
   const [unit, setUnit] = useState<'kg' | 'lbs'>('kg');
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -74,7 +79,24 @@ export default function LogWeightScreen() {
         await database.batch(trackerCreation, profileUpdate);
       });
 
-      navigation.goBack();
+      // LOOP FIX: Use replace() so we can't go "back" to this screen
+      Alert.alert(
+        'Weight Logged! 🚀',
+        'Your metrics have been updated. Would you like to snap your progress pictures for this week?',
+        [
+          { 
+            text: 'Maybe Later', 
+            style: 'cancel', 
+            onPress: () => navigation.goBack() 
+          },
+          { 
+            text: 'Take Photos', 
+            style: 'default',
+            onPress: () => navigation.replace('CameraScreen', { pose: 'front' }) 
+          }
+        ]
+      );
+
     } catch (error) {
       console.error('Error saving weight:', error);
       Alert.alert('Error', 'Could not save weight data.');
@@ -151,28 +173,22 @@ export default function LogWeightScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#09090B' },
   innerContainer: { flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' },
-  
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, marginBottom: 20 },
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#18181B', justifyContent: 'center', alignItems: 'center' },
   headerTitle: { color: '#FFF', fontSize: 18, fontWeight: '700', letterSpacing: 0.5 },
-  
   content: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 40 },
   promptText: { color: '#A1A1AA', fontSize: 16, fontWeight: '500', marginBottom: 30 },
-  
   inputWrapper: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', marginBottom: 50 },
   hugeInput: { fontSize: 80, fontWeight: '800', color: '#FFF', textAlign: 'center', minWidth: 140 },
   unitSuffix: { fontSize: 24, fontWeight: '600', color: '#52525B', marginLeft: 8, paddingBottom: 10 },
-  
   toggleContainer: { flexDirection: 'row', backgroundColor: '#18181B', borderRadius: 100, padding: 4, width: '90%', borderWidth: 1, borderColor: '#27272A' },
   toggleBtn: { flex: 1, paddingVertical: 14, alignItems: 'center', borderRadius: 100 },
   activeToggleBtn: { backgroundColor: '#27272A', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 2 },
   toggleText: { color: '#71717A', fontWeight: '600', fontSize: 15 },
   activeToggleText: { color: '#FFF' },
-  
   footer: { paddingBottom: Platform.OS === 'ios' ? 10 : 30 },
   infoBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: 12, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.2)' },
   infoText: { color: '#10B981', fontSize: 13, fontWeight: '500' },
-  
   saveBtn: { backgroundColor: '#10B981', flexDirection: 'row', paddingVertical: 18, borderRadius: 100, alignItems: 'center', justifyContent: 'center', shadowColor: '#10B981', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
   saveBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 18, marginRight: 8 }
 });
