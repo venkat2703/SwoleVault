@@ -18,21 +18,23 @@ export default function WorkoutScreen() {
 
   const fetchHistory = async () => {
     setLoading(true);
+    // FIX 1: Instantly clear old data so the render function doesn't crash on stale data
+    setHistory([]); 
+    
     try {
       if (activeTab === 'Strength') {
-        // Fetch raw logs
         const logs: any[] = await database.get('workout_trackers').query(Q.sortBy('date', Q.desc)).fetch();
-        
-        // FIX 1: Fetch lookup names ONCE into a memory dictionary (Safest & Fastest method)
         const lookups: any[] = await database.get('workout_lookups').query().fetch();
+        
         const lookupMap: Record<string, string> = {};
         lookups.forEach(l => { lookupMap[l.id] = l.name; });
 
         const groupedMap: { [key: string]: any } = {};
 
         for (const log of logs) {
-          // Use the dictionary map instead of log.workout.fetch()
-          const workoutName = lookupMap[log.workoutId] || 'Unknown Exercise';
+          // FIX 2: Use _raw to safely get the foreign key ID in WatermelonDB
+          const workoutId = log._raw.workout_id as string;
+          const workoutName = lookupMap[workoutId] || 'Unknown Exercise';
           const dateKey = new Date(log.date).toDateString(); 
           const groupKey = `${dateKey}-${workoutName}`;
 
@@ -53,21 +55,24 @@ export default function WorkoutScreen() {
         setHistory(Object.values(groupedMap));
         
       } else {
-        // Cardio Fetching
         const logs: any[] = await database.get('cardio_trackers').query(Q.sortBy('date', Q.desc)).fetch();
-        
         const lookups: any[] = await database.get('cardio_workout_lookups').query().fetch();
+        
         const lookupMap: Record<string, string> = {};
         lookups.forEach(l => { lookupMap[l.id] = l.name; });
 
-        const results = logs.map(log => ({
+        const results = logs.map(log => {
+          // Use _raw to safely get the cardio foreign key ID
+          const cardioId = log._raw.cardio_id as string;
+          return {
             id: log.id,
-            name: lookupMap[log.cardioId] || 'Cardio Session',
+            name: lookupMap[cardioId] || 'Cardio Session',
             date: log.date,
             duration: log.durationMins || 0,
             steps: log.steps || 0,
             cals: log.caloriesBurned || 0
-        }));
+          };
+        });
         setHistory(results);
       }
     } catch (e) {
@@ -92,8 +97,8 @@ export default function WorkoutScreen() {
             <Text style={styles.historyDetail}>
               {item.sets} Sets • {item.totalReps} Total Reps
             </Text>
-            {/* FIX 2: Create a copy of the array [...item.weights] before reversing to prevent a React mutation crash */}
-            <Text style={styles.weightTag}>Weights: {[...item.weights].reverse().join(', ')} kg</Text>
+            {/* FIX 3: Safe array spread using (item.weights || []) prevents iteration crashes */}
+            <Text style={styles.weightTag}>Weights: {[...(item.weights || [])].reverse().join(', ')} kg</Text>
           </View>
         ) : (
           <View>
